@@ -1,0 +1,4 @@
+sorted_receipts/
+data/
+__pycache__/
+*.log
