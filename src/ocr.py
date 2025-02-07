@@ -1,22 +1,34 @@
 import pytesseract
 from pdf2image import convert_from_path
-import os
-import cv2
+import re
 
-POPPLER_PATH = r"F:\Code\Dependencies\poppler-24.08.0\Library\bin"
-TESSERACT_PATH = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 def extract_text_from_pdf(pdf_path):
-    images = convert_from_path(pdf_path,poppler_path=POPPLER_PATH)
-    text = ''
+    images = convert_from_path(pdf_path)
+    text = ""
     for img in images:
-        img_cv = cv2.cvtColor(cv2.imread(img.filename), cv2.COLOR_BGR2RGB)
-        text += pytesseract.image_to_string(img_cv)+'\n'
-        
+        text += pytesseract.image_to_string(img)+'\n'
     return text
 
-if __name__ == '__main__':
-    sample_pdf= "data/sample_receipt.pdf"
-    extracted_text = extract_text_from_pdf(sample_pdf)
-    print(extracted_text)
+def extract_receipt_data(text):
+    date_pattern = r"\b(\d{2,4}[-/.]\d{1,2}[-/.]\d{1,2})\b"
+    total_pattern = r"Total:\s*\$?([\d,]+\.\d{2})"
+    store_pattern = r"(?P<store>[A-za-z\s]+(?:Inc\.|Ltd\.|Store|Supermarket))"
+    
+    # Extract data
+    date_match = re.search(date_pattern, text)
+    total_match = re.search(total_pattern, text)
+    store_match = re.search(store_pattern, text)
+    
+    return {
+    "Date": date_match.group(1) if date_match else "Not Found",
+    "Store": store_match.group("store") if store_match else "Not Found",
+    "Total": total_match.group(1) if total_match else "Not Found"
+    }
+    
+pdf_file = "data/sample_receipt.pdf"
+text_data = extract_text_from_pdf(pdf_file)
+receipt_data = extract_receipt_data(text_data)
+
+print(receipt_data)
