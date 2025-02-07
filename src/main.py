@@ -1,6 +1,9 @@
+import sys
 import os
-from src.ocr import extract_text_from_pdf
-from src.file_manager import move_receipt
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from ocr import extract_text_from_pdf
+from file_manager import move_receipt
 
 DATA_FOLDER = "data"
 
